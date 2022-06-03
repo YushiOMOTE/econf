@@ -45,6 +45,17 @@ After:  A { x: false, y: 42 }
 There are some existing crates that provide similar features but `econf` is unique in the following ways:
 
 * **Supports nesting:** Supports nested structs in an intutive manner.
-* **Supports compound types:** Supports `tuple`, `array`, `Vec`, `HashMap` and various types.
+* **Supports compound types:** Supports `tuple`, `Vec`, `HashMap` and various types.
 * **Supplemental:** Loads supplementally into existing variables in the code without changing the original logic.
 * **Maintainer friendly:** Simple code base. Comprehensible with a little study on basic macro usage.
+
+## Supported types
+
+* Boolean: `bool`
+* Integer: `isize`, `usize`, `i8`, `i16`,`i32`,`i64`,`i128`, `u8`,`u16`,`u32`,`u64`,`u128`
+* String: `char`, `String`
+* Float: `f32`, `f64`
+* Network: `IpAddr`,`Ipv4Addr`,`Ipv6Addr`,`SocketAddr`,`SocketAddrV4`,`SocketAddrV6`
+* Non-zero types: `NonZeroI128`,`NonZeroI16`,`NonZeroI32`,`NonZeroI64`,`NonZeroI8`,`NonZeroIsize`,`NonZeroU128`, `NonZeroU16`,`NonZeroU32`,`NonZeroU64`,`NonZeroU8`, `NonZeroUsize`
+* Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`
+    * Containers are parsed as YAML format. See [the tests](./econf/tests/basics.rs).
