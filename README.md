@@ -44,7 +44,7 @@ After:  A { x: false, y: 42 }
 
 There are some existing crates that provide similar features but `econf` is unique in the following ways:
 
-* **Supports nesting:** Supports nested structs in an intutive manner.
+* **Supports nesting:** Supports nested structs in an intutive manner with a little constraint.
 * **Supports compound types:** Supports `tuple`, `Vec`, `HashMap` and various types.
 * **Supplemental:** Loads supplementally into existing variables in the code without changing the original logic.
 * **Maintainer friendly:** Simple code base. Comprehensible with a little study on basic macro usage.
