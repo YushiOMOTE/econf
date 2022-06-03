@@ -1,0 +1,15 @@
+[package]
+name = "econf-derive"
+version = "0.1.2"
+authors = ["Yushi OMOTE <yushiomote@gmail.com>"]
+edition = "2018"
+license = "MIT"
+description = "Load environment variables into your struct members directly."
+
+[dependencies]
+syn = "0.15"
+quote = "0.6"
+proc-macro2 = "0.4"
+
+[lib]
+proc-macro = true
