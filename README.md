@@ -47,7 +47,7 @@ There are some existing crates that provide similar features but `econf` is uniq
 * **Supports nesting:** Supports nested structs in an intutive manner with a little constraint.
 * **Supports compound types:** Supports `tuple`, `Vec`, `HashMap` and various types.
 * **Supplemental:** Loads supplementally into existing variables in the code without changing the original logic.
-* **Maintainer friendly:** Simple code base. Comprehensible with a little study on basic macro usage.
+* **Contributor friendly:** Simple code base. Comprehensible with a little study on basic macro usage.
 
 ## Supported types
 
