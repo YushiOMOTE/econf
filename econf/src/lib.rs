@@ -10,6 +10,10 @@ use std::num::{
 };
 use std::str::FromStr;
 
+#[doc = include_str!("../../README.md")]
+#[cfg(doctest)]
+pub struct ReadmeDoctests;
+
 pub use econf_derive::LoadEnv;
 
 pub trait LoadEnv

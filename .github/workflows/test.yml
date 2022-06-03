@@ -1,0 +1,26 @@
+name: test
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build (stable)
+        run: cargo build --verbose
+      - name: Build examples (stable)
+        run: cargo build --verbose --examples
+      - name: Test (stable)
+        run: cargo test --verbose
+      - name: Install nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - name: Build (nightly)
+        run: cargo build --verbose
+      - name: Build examples (nightly)
+        run: cargo build --verbose --examples
+      - name: Test (nightly)
+        run: cargo test --verbose
