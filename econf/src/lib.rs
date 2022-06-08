@@ -8,6 +8,7 @@ use std::num::{
     NonZeroI128, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI8, NonZeroIsize, NonZeroU128,
     NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize,
 };
+use std::path::PathBuf;
 use std::str::FromStr;
 
 #[doc = include_str!("../../README.md")]
@@ -86,7 +87,7 @@ impl_load_env! {
     u8, u16, u32, u64, u128,
     IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6,
     NonZeroI128, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI8, NonZeroIsize, NonZeroU128,
-    NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize
+    NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize, PathBuf
 }
 
 macro_rules! impl_load_env_containers {
