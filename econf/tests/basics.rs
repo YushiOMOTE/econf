@@ -1,6 +1,7 @@
 use econf::LoadEnv;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
+use std::path::PathBuf;
 
 #[derive(LoadEnv)]
 struct Boolean {
@@ -487,6 +488,30 @@ fn duration() {
     assert_eq!(a.d1, Duration::from_secs(100));
     assert_eq!(a.d2, Duration::from_secs(60));
     assert_eq!(a.d3, Duration::from_secs(3600));
+}
+
+#[derive(LoadEnv)]
+struct Paths {
+    p1: PathBuf,
+    p2: PathBuf,
+    p3: PathBuf,
+}
+
+#[test]
+fn path_buf() {
+    std::env::set_var("PATHS_P2", "other/path/to/file.toml");
+    std::env::set_var("PATHS_P3", "data.db");
+
+    let a = Paths {
+        p1: "path/to/dir/".parse().unwrap(),
+        p2: "path/to/file.toml".parse().unwrap(),
+        p3: "file.rs".parse().unwrap(),
+    };
+
+    let a = econf::load(a, "paths");
+    assert_eq!(a.p1, "path/to/dir/".parse::<PathBuf>().unwrap());
+    assert_eq!(a.p2, "other/path/to/file.toml".parse::<PathBuf>().unwrap());
+    assert_eq!(a.p3, "data.db".parse::<PathBuf>().unwrap());
 }
 
 #[test]
