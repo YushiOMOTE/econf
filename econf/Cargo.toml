@@ -8,6 +8,7 @@ description = "Load environment variables into your struct members directly."
 homepage = "https://github.com/YushiOMOTE/econf"
 documentation = "https://docs.rs/econf"
 repository = "https://github.com/YushiOMOTE/econf"
+readme = "../README.md"
 
 [dependencies]
 log = "0.4"
