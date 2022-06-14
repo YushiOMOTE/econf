@@ -57,7 +57,7 @@ There are some existing crates that provide similar features but `econf` is uniq
 * Float: `f32`, `f64`
 * Network: `IpAddr`,`Ipv4Addr`,`Ipv6Addr`,`SocketAddr`,`SocketAddrV4`,`SocketAddrV6`
 * Non-zero types: `NonZeroI128`,`NonZeroI16`,`NonZeroI32`,`NonZeroI64`,`NonZeroI8`,`NonZeroIsize`,`NonZeroU128`, `NonZeroU16`,`NonZeroU32`,`NonZeroU64`,`NonZeroU8`, `NonZeroUsize`
-* File system: PathBuf
+* File system: `PathBuf`
 * Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`
     * Containers are parsed as YAML format. See [the tests](./econf/tests/basics.rs).
 
@@ -66,6 +66,8 @@ There are some existing crates that provide similar features but `econf` is uniq
 Fields that do not implement LoadEnv or simply should not be loaded by econf can be skipped by adding the `#[econf(skip)]` helper attribute:
 
 ``` rust
+use econf::LoadEnv;
+
 #[derive(LoadEnv)]
 struct A {
     x: bool,
