@@ -16,7 +16,7 @@ impl Default for X {
 }
 
 #[derive(Default, Debug, LoadEnv)]
-struct B(u32);
+struct B(u32, #[econf(skip)] bool);
 
 #[derive(Default, Debug, LoadEnv)]
 struct C;
@@ -25,6 +25,7 @@ struct C;
 struct D {
     value1: String,
     value2: bool,
+    #[econf(skip)]
     value3: u32,
 }
 
