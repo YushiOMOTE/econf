@@ -60,3 +60,16 @@ There are some existing crates that provide similar features but `econf` is uniq
 * File system: PathBuf
 * Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`
     * Containers are parsed as YAML format. See [the tests](./econf/tests/basics.rs).
+
+## Skipping fields
+
+Fields that do not implement LoadEnv or simply should not be loaded by econf can be skipped by adding the `#[econf(skip)]` helper attribute:
+
+``` rust
+#[derive(LoadEnv)]
+struct A {
+    x: bool,
+    #[econf(skip)]
+    y: u64, // will not be loaded by econf
+}
+```

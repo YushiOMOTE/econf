@@ -323,6 +323,39 @@ fn tuple_struct() {
     assert_eq!(a.t3, TS3(vec![11, 11, 12], -43.2));
 }
 
+struct NotLoadEnv {
+    s: String,
+}
+
+#[derive(LoadEnv)]
+struct Skipped {
+    v1: bool,
+    #[econf(skip)]
+    v2: u32,
+    #[econf(skip)]
+    v3: NotLoadEnv,
+}
+
+#[test]
+fn skipped() {
+    std::env::set_var("SKIPPED_V1", "true");
+    std::env::set_var("SKIPPED_V2", "0");
+    std::env::set_var("SKIPPED_V3", "skipped");
+
+    let a = Skipped {
+        v1: false,
+        v2: 42,
+        v3: NotLoadEnv {
+            s: "initial".to_string(),
+        },
+    };
+
+    let a = econf::load(a, "skipped");
+    assert_eq!(a.v1, true);
+    assert_eq!(a.v2, 42);
+    assert_eq!(a.v3.s, "initial".to_string());
+}
+
 #[derive(LoadEnv)]
 struct Net {
     n1: IpAddr,

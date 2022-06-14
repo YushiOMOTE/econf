@@ -3,9 +3,9 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Fields};
+use syn::{parse_macro_input, Data, DeriveInput, Field, Fields, Meta, NestedMeta};
 
-#[proc_macro_derive(LoadEnv)]
+#[proc_macro_derive(LoadEnv, attributes(econf))]
 pub fn load_env(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
@@ -24,25 +24,50 @@ pub fn load_env(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
+fn is_skip(f: &Field) -> bool {
+    f.attrs.iter().any(|a| {
+        a.path.is_ident("econf")
+            && matches!(a.parse_meta().unwrap(), Meta::List(meta) if meta.nested.iter().any(|nm| {
+                matches!(nm, NestedMeta::Meta(Meta::Word(word)) if word.to_string() == "skip")
+            }))
+    })
+}
+
 fn content(name: &Ident, data: &Data) -> TokenStream2 {
     match data {
         Data::Struct(data) => match &data.fields {
             Fields::Named(fields) => {
-                let fnames0 = fields.named.iter().map(|f| &f.ident);
-                let fnames1 = fields.named.iter().map(|f| &f.ident);
-                let fnames2 = fields.named.iter().map(|f| &f.ident);
+                let fields = fields.named.iter().map(|f| {
+                    let ident = &f.ident;
+                    if is_skip(f) {
+                        return quote! {
+                            #ident: self.#ident,
+                        };
+                    }
+                    quote! {
+                        #ident: self.#ident.load(&(path.to_owned() + "_" + stringify!(#ident)), dup),
+                    }
+                });
                 quote! {
                     Self { #(
-                        #fnames0: self.#fnames1.load(&(path.to_owned() + "_" + stringify!(#fnames2)), dup),
+                        #fields
                     )* }
                 }
             }
             Fields::Unnamed(fields) => {
-                let indices0 = (0..fields.unnamed.len()).map(|i| syn::Index::from(i));
-                let indices1 = (0..fields.unnamed.len()).map(|i| syn::Index::from(i));
+                let fields = fields.unnamed.iter().enumerate().map(|(i, f)| {
+                    let i = syn::Index::from(i);
+                    let i = &i;
+                    if is_skip(f) {
+                        return quote! { self.#i, };
+                    }
+                    quote! {
+                        self.#i.load(&(path.to_owned() + "_" + &#i.to_string()), dup),
+                    }
+                });
                 quote! {
-                    #name ( #(
-                        self.#indices0.load(&(path.to_owned() + "_" + &#indices1.to_string()), dup),
+                    Self ( #(
+                        #fields
                     )* )
                 }
             }
