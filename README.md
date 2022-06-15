@@ -11,7 +11,7 @@ Loads environment variables into your structs in one shot.
 
 `econf` allows to override struct fields with environment variables easily. This is useful to build up applications that optionally overrides some configuration with environment variables. Here is the basic usage:
 
-``` rust
+```rust
 use econf::LoadEnv;
 
 #[derive(Debug, LoadEnv)]
@@ -27,20 +27,27 @@ fn main() {
     };
     println!("Before: {:?}", a);
 
-    let a = econf::load(a, "app");
+    let a = econf::load(a, "PREFIX");
     println!("After:  {:?}", a);
 }
 ```
 
-``` sh
+```sh
 $ ./app
 Before: A { x: true, y: 42 }
 After:  A { x: true, y: 42 }
 
-$ APP_X=false ./app
+$ PREFIX_X=false ./app
 Before: A { x: true, y: 42 }
 After:  A { x: false, y: 42 }
 ```
+
+In this example,
+
+* `PREFIX_X` is loaded to `x`
+* `PREFIX_Y` is loaded to `y`
+
+## Why econf?
 
 There are some existing crates that provide similar features but `econf` is unique in the following ways:
 
@@ -57,7 +64,7 @@ There are some existing crates that provide similar features but `econf` is uniq
 * Float: `f32`, `f64`
 * Network: `IpAddr`,`Ipv4Addr`,`Ipv6Addr`,`SocketAddr`,`SocketAddrV4`,`SocketAddrV6`
 * Non-zero types: `NonZeroI128`,`NonZeroI16`,`NonZeroI32`,`NonZeroI64`,`NonZeroI8`,`NonZeroIsize`,`NonZeroU128`, `NonZeroU16`,`NonZeroU32`,`NonZeroU64`,`NonZeroU8`, `NonZeroUsize`
-* File system: PathBuf
+* File system: `PathBuf`
 * Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`
     * Containers are parsed as YAML format. See [the tests](./econf/tests/basics.rs).
 
@@ -65,7 +72,7 @@ There are some existing crates that provide similar features but `econf` is uniq
 
 Fields that do not implement LoadEnv or simply should not be loaded by econf can be skipped by adding the `#[econf(skip)]` helper attribute:
 
-``` rust
+```rust
 #[derive(LoadEnv)]
 struct A {
     x: bool,
@@ -73,3 +80,6 @@ struct A {
     y: u64, // will not be loaded by econf
 }
 ```
+
+
+License: MIT
