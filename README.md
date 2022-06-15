@@ -11,7 +11,7 @@ Loads environment variables into your structs in one shot.
 
 `econf` allows to override struct fields with environment variables easily. This is useful to build up applications that optionally overrides some configuration with environment variables. Here is the basic usage:
 
-``` rust
+```rust
 use econf::LoadEnv;
 
 #[derive(Debug, LoadEnv)]
@@ -27,17 +27,17 @@ fn main() {
     };
     println!("Before: {:?}", a);
 
-    let a = econf::load(a, "app");
+    let a = econf::load(a, "PREFIX");
     println!("After:  {:?}", a);
 }
 ```
 
-``` sh
+```sh
 $ ./app
 Before: A { x: true, y: 42 }
 After:  A { x: true, y: 42 }
 
-$ APP_X=false ./app
+$ PREFIX_X=false ./app
 Before: A { x: true, y: 42 }
 After:  A { x: false, y: 42 }
 ```
@@ -49,7 +49,7 @@ There are some existing crates that provide similar features but `econf` is uniq
 * **Supplemental:** Loads supplementally into existing variables in the code without changing the original logic.
 * **Contributor friendly:** Simple code base. Comprehensible with a little study on basic macro usage.
 
-## Supported types
+### Supported types
 
 * Boolean: `bool`
 * Integer: `isize`, `usize`, `i8`, `i16`,`i32`,`i64`,`i128`, `u8`,`u16`,`u32`,`u64`,`u128`
@@ -61,13 +61,11 @@ There are some existing crates that provide similar features but `econf` is uniq
 * Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`
     * Containers are parsed as YAML format. See [the tests](./econf/tests/basics.rs).
 
-## Skipping fields
+### Skipping fields
 
 Fields that do not implement LoadEnv or simply should not be loaded by econf can be skipped by adding the `#[econf(skip)]` helper attribute:
 
-``` rust
-use econf::LoadEnv;
-
+```rust
 #[derive(LoadEnv)]
 struct A {
     x: bool,
@@ -75,3 +73,6 @@ struct A {
     y: u64, // will not be loaded by econf
 }
 ```
+
+
+License: MIT
