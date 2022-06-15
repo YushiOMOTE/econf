@@ -49,7 +49,7 @@ There are some existing crates that provide similar features but `econf` is uniq
 * **Supplemental:** Loads supplementally into existing variables in the code without changing the original logic.
 * **Contributor friendly:** Simple code base. Comprehensible with a little study on basic macro usage.
 
-### Supported types
+## Supported types
 
 * Boolean: `bool`
 * Integer: `isize`, `usize`, `i8`, `i16`,`i32`,`i64`,`i128`, `u8`,`u16`,`u32`,`u64`,`u128`
@@ -61,7 +61,7 @@ There are some existing crates that provide similar features but `econf` is uniq
 * Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`
     * Containers are parsed as YAML format. See [the tests](./econf/tests/basics.rs).
 
-### Skipping fields
+## Skipping fields
 
 Fields that do not implement LoadEnv or simply should not be loaded by econf can be skipped by adding the `#[econf(skip)]` helper attribute:
 
