@@ -40,6 +40,13 @@
 //! After:  A { x: false, y: 42 }
 //! ```
 //!
+//! In this example,
+//!
+//! * `PREFIX_X` is loaded to `x`
+//! * `PREFIX_Y` is loaded to `y`
+//!
+//! # Why econf?
+//!
 //! There are some existing crates that provide similar features but `econf` is unique in the following ways:
 //!
 //! * **Supports nesting:** Supports nested structs in an intutive manner with a little constraint.
