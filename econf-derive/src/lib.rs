@@ -1,9 +1,10 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
+
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Field, Fields, Meta, NestedMeta};
+use syn::{Data, DeriveInput, Field, Fields, Meta, NestedMeta, parse_macro_input};
 
 #[proc_macro_derive(LoadEnv, attributes(econf))]
 pub fn load_env(input: TokenStream) -> TokenStream {
@@ -15,7 +16,7 @@ pub fn load_env(input: TokenStream) -> TokenStream {
 
     let expanded = quote! {
         impl #impl_generics ::econf::LoadEnv for #name #ty_generics #where_clause {
-            fn load(self, path: &str, dup: &mut ::std::collections::HashSet<String>) -> Self {
+            fn load(self, path: &str, loader: &mut ::econf::Loader) -> Self {
                 #content
             }
         }
@@ -45,7 +46,7 @@ fn content(name: &Ident, data: &Data) -> TokenStream2 {
                         };
                     }
                     quote! {
-                        #ident: self.#ident.load(&(path.to_owned() + "_" + stringify!(#ident)), dup),
+                        #ident: self.#ident.load(&(path.to_owned() + "_" + stringify!(#ident)), loader),
                     }
                 });
                 quote! {
@@ -62,7 +63,7 @@ fn content(name: &Ident, data: &Data) -> TokenStream2 {
                         return quote! { self.#i, };
                     }
                     quote! {
-                        self.#i.load(&(path.to_owned() + "_" + &#i.to_string()), dup),
+                        self.#i.load(&(path.to_owned() + "_" + &#i.to_string()), loader),
                     }
                 });
                 quote! {
@@ -85,7 +86,7 @@ fn content(name: &Ident, data: &Data) -> TokenStream2 {
             let enums2 = data.variants.iter().map(|f| &f.ident);
 
             quote! {
-                match String::default().load(path, dup).as_ref() {
+                match String::default().load(path, loader).as_ref() {
                     #(
                         stringify!(#enums1) => #enums0::#enums2,
                     )*
