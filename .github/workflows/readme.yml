@@ -3,7 +3,7 @@ name: readme
 on: [push]
 
 jobs:
-  build:
+  readme:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -14,4 +14,4 @@ jobs:
       - name: Message on failure
         if: failure()
         run: |
-          echo "::error file=README.md,title=Regenerate README::We generate `README.md` from docs (`lib.rs`) by `readme.sh`. Please run `readme.sh` locally and commit the change"
+          echo "::error file=README.md,title=Regenerate README::We generate README.md from docs (lib.rs) by readme.sh. Please run readme.sh locally and commit the change"
