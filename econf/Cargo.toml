@@ -1,6 +1,6 @@
 [package]
 name = "econf"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Yushi OMOTE <yushiomote@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -14,7 +14,7 @@ readme = "README.md"
 log = "0.4"
 serde = "1.0"
 serde_yaml = "0.8"
-econf-derive = { version = "0.1.3", path = "../econf-derive" }
+econf-derive = { version = "0.1.4", path = "../econf-derive" }
 parse_duration = "1.0"
 
 [dev-dependencies]
