@@ -1,0 +1,17 @@
+name: readme
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Re-generate README.md
+        run: ./readme.sh
+      - name: Check uncommitted
+        run: git diff --quiet
+      - name: Message on failure
+        if: failure()
+        run: |
+          echo "::error file=README.md,title=Regenerate README::We generate `README.md` from docs (`lib.rs`) by `readme.sh`. Please run `readme.sh` locally and commit the change"
