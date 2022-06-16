@@ -52,8 +52,8 @@ In this example,
 There are some existing crates that provide similar features but `econf` is unique in the following ways:
 
 * **Supports nesting:** Supports nested structs in an intutive manner with a little constraint.
-* **Supports compound types:** Supports `tuple`, `Vec`, `HashMap` and various types.
-* **Supplemental:** Loads supplementally into existing variables in the code without changing the original logic.
+* **Supports containers:** Supports `Vec`, `HashMap` and various types.
+* **Supplemental:** Loads into existing variables in the code without changing the original logic.
 * **Contributor friendly:** Simple code base. Comprehensible with a little study on basic macro usage.
 
 ## Supported types
@@ -65,8 +65,75 @@ There are some existing crates that provide similar features but `econf` is uniq
 * Network: `IpAddr`,`Ipv4Addr`,`Ipv6Addr`,`SocketAddr`,`SocketAddrV4`,`SocketAddrV6`
 * Non-zero types: `NonZeroI128`,`NonZeroI16`,`NonZeroI32`,`NonZeroI64`,`NonZeroI8`,`NonZeroIsize`,`NonZeroU128`, `NonZeroU16`,`NonZeroU32`,`NonZeroU64`,`NonZeroU8`, `NonZeroUsize`
 * File system: `PathBuf`
-* Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`
-    * Containers are parsed as YAML format. See [the tests](./econf/tests/basics.rs).
+* Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`, `tuple`
+    * Containers are parsed as YAML format. See [the tests](https://github.com/YushiOMOTE/econf/blob/master/econf/tests/basics.rs).
+
+## Nesting
+
+Nested structs are supported.
+
+```rust
+#[derive(LoadEnv)]
+struct A {
+    v1: usize,
+    v2: B,
+}
+
+#[derive(LoadEnv)]
+struct B {
+    v1: usize,
+    v2: usize,
+}
+
+fn main() {
+    let a = A {
+        v1: 1,
+        v2: B {
+            v1: 2,
+            v2: 3,
+        },
+    };
+
+    let a = econf::load(a, "PREFIX");
+}
+```
+
+In this example,
+
+* `PREFIX_V1` is loaded to `a.v1`
+* `PREFIX_V2_V1` is loaded to `a.v2.v1`
+* `PREFIX_V2_V2` is loaded to `a.v2.v2`
+
+Fields in child structs can be specified by chaining the field names with `_` as a separator.
+However, there's cases that names conflict. For example,
+
+```rust
+#[derive(LoadEnv)]
+struct A {
+    v2_v1: usize,
+    v2: B,
+}
+
+#[derive(LoadEnv)]
+struct B {
+    v1: usize,
+    v2: usize,
+}
+
+fn main() {
+    let a = A {
+        v2_v1: 1,
+        v2: B {
+            v1: 2,
+            v2: 3,
+        },
+    };
+
+    let a = econf::load(a, "PREFIX");
+}
+```
+
+Here `PREFIX_V2_V1` corresponds to both `a.v2_v1` and `a.v2.v1`. In this case, `econf` prints warning through [`log facade`](https://docs.rs/log/latest/log/) and the value is loaded to both `a.v2_v1` and `a.v2.v1`.
 
 ## Skipping fields
 
