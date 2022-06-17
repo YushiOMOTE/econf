@@ -47,6 +47,8 @@ In this example,
 * `PREFIX_X` is loaded to `x`
 * `PREFIX_Y` is loaded to `y`
 
+The environment variables are all upper-case with `_` separated.
+
 ## Why econf?
 
 There are some existing crates that provide similar features but `econf` is unique in the following ways:
@@ -105,7 +107,7 @@ In this example,
 * `PREFIX_V2_V2` is loaded to `a.v2.v2`
 
 Fields in child structs can be specified by chaining the field names with `_` as a separator.
-However, there's cases that names conflict. For example,
+However, there're cases that names conflict. For example,
 
 ```rust
 #[derive(LoadEnv)]
