@@ -45,13 +45,15 @@
 //! * `PREFIX_X` is loaded to `x`
 //! * `PREFIX_Y` is loaded to `y`
 //!
+//! The environment variables are all upper-case with `_` separated.
+//!
 //! # Why econf?
 //!
 //! There are some existing crates that provide similar features but `econf` is unique in the following ways:
 //!
 //! * **Supports nesting:** Supports nested structs in an intutive manner with a little constraint.
-//! * **Supports compound types:** Supports `tuple`, `Vec`, `HashMap` and various types.
-//! * **Supplemental:** Loads supplementally into existing variables in the code without changing the original logic.
+//! * **Supports containers:** Supports `Vec`, `HashMap` and various types.
+//! * **Supplemental:** Loads into existing variables in the code without changing the original logic.
 //! * **Contributor friendly:** Simple code base. Comprehensible with a little study on basic macro usage.
 //!
 //! # Supported types
@@ -63,8 +65,77 @@
 //! * Network: `IpAddr`,`Ipv4Addr`,`Ipv6Addr`,`SocketAddr`,`SocketAddrV4`,`SocketAddrV6`
 //! * Non-zero types: `NonZeroI128`,`NonZeroI16`,`NonZeroI32`,`NonZeroI64`,`NonZeroI8`,`NonZeroIsize`,`NonZeroU128`, `NonZeroU16`,`NonZeroU32`,`NonZeroU64`,`NonZeroU8`, `NonZeroUsize`
 //! * File system: `PathBuf`
-//! * Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`
-//!     * Containers are parsed as YAML format. See [the tests](./econf/tests/basics.rs).
+//! * Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`, `tuple`
+//!     * Containers are parsed as YAML format. See [the tests](https://github.com/YushiOMOTE/econf/blob/master/econf/tests/basics.rs).
+//!
+//! # Nesting
+//!
+//! Nested structs are supported.
+//!
+//! ```
+//! # use econf::LoadEnv;
+//! #[derive(LoadEnv)]
+//! struct A {
+//!     v1: usize,
+//!     v2: B,
+//! }
+//!
+//! #[derive(LoadEnv)]
+//! struct B {
+//!     v1: usize,
+//!     v2: usize,
+//! }
+//!
+//! fn main() {
+//!     let a = A {
+//!         v1: 1,
+//!         v2: B {
+//!             v1: 2,
+//!             v2: 3,
+//!         },
+//!     };
+//!
+//!     let a = econf::load(a, "PREFIX");
+//! }
+//! ```
+//!
+//! In this example,
+//!
+//! * `PREFIX_V1` is loaded to `a.v1`
+//! * `PREFIX_V2_V1` is loaded to `a.v2.v1`
+//! * `PREFIX_V2_V2` is loaded to `a.v2.v2`
+//!
+//! Fields in child structs can be specified by chaining the field names with `_` as a separator.
+//! However, there're cases that names conflict. For example,
+//!
+//! ```
+//! # use econf::LoadEnv;
+//! #[derive(LoadEnv)]
+//! struct A {
+//!     v2_v1: usize,
+//!     v2: B,
+//! }
+//!
+//! #[derive(LoadEnv)]
+//! struct B {
+//!     v1: usize,
+//!     v2: usize,
+//! }
+//!
+//! fn main() {
+//!     let a = A {
+//!         v2_v1: 1,
+//!         v2: B {
+//!             v1: 2,
+//!             v2: 3,
+//!         },
+//!     };
+//!
+//!     let a = econf::load(a, "PREFIX");
+//! }
+//! ```
+//!
+//! Here `PREFIX_V2_V1` corresponds to both `a.v2_v1` and `a.v2.v1`. In this case, `econf` prints warning through [`log facade`](https://docs.rs/log/latest/log/) and the value is loaded to both `a.v2_v1` and `a.v2.v1`.
 //!
 //! # Skipping fields
 //!
@@ -80,10 +151,7 @@
 //! }
 //! ```
 //!
-use log::*;
-use serde::de::DeserializeOwned;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
-use std::fmt::Display;
 use std::hash::Hash;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
 use std::num::{
@@ -91,15 +159,19 @@ use std::num::{
     NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize,
 };
 use std::path::PathBuf;
-use std::str::FromStr;
+
+use serde::de::DeserializeOwned;
 
 pub use econf_derive::LoadEnv;
 
+pub use crate::loader::Loader;
+
+mod loader;
+
 /// Makes the type loadable from environment variables.
 ///
-/// [`LoadEnv`](econf_derive::LoadEnv) derive macro automatically implements this trait. In the example below,
-/// the type `A` implements this trait and can be loaded by [`load`](load) method.
-/// Recommends to use the derive macro instead of manually implementing this trait.
+/// [`LoadEnv`](econf_derive::LoadEnv) derive macro automatically implements this trait. Therefore, usually no need to implement this trait manually.
+/// In the example below, the type `A` implements this trait and can be loaded by [`load`](load) method.
 ///
 /// ```rust
 /// # use econf::LoadEnv;
@@ -111,63 +183,44 @@ pub use econf_derive::LoadEnv;
 /// }
 /// ```
 ///
+/// The trait can be manually implemented.
+///
+/// ```
+/// use econf::{LoadEnv, Loader};
+///
+/// struct A {
+///     x: bool,
+/// }
+///
+/// impl LoadEnv for A {
+///
+///     fn load(self, path: &str, _loader: &mut Loader) -> Self {
+///         match std::env::var(path) {
+///             Ok(s) if s == "POSITIVE" => A { x: true },
+///             Ok(s) if s == "NEGATIVE" => A { x: false },
+///             Ok(_) | Err(_) => self,
+///         }
+///     }
+///
+/// }
+/// ```
+///
+/// `path` is the environment variable name to be loaded.
+/// Return a new value to override the original value (the original value is `self`).
+/// Return `self` to use the original value.
+///
 pub trait LoadEnv
 where
     Self: Sized,
 {
-    fn load(self, path: &str, dup: &mut HashSet<String>) -> Self;
-}
-
-fn load_and_map<T, F, E>(value: T, path: &str, dup: &mut HashSet<String>, map: F) -> T
-where
-    F: FnOnce(&str) -> Result<T, E>,
-    E: Display,
-{
-    let path = path.to_uppercase();
-
-    if dup.get(&path).is_some() {
-        warn!("econf: warning: {} is ambiguous", path);
-    }
-    dup.insert(path.clone());
-
-    match std::env::var(path.clone()) {
-        Ok(s) => match map(&s) {
-            Ok(v) => {
-                info!("econf: loading {}: found {}", path, s);
-                v
-            }
-            Err(e) => {
-                error!("econf: loading {}: error on parsing \"{}\": {}", path, s, e);
-                value
-            }
-        },
-        Err(_) => {
-            info!("econf: loading {}: not found", path);
-            value
-        }
-    }
-}
-
-fn load_as_yaml<T>(value: T, path: &str, dup: &mut HashSet<String>) -> T
-where
-    T: DeserializeOwned,
-{
-    load_and_map(value, path, dup, |s| serde_yaml::from_str(s))
-}
-
-fn load_as_str<T>(value: T, path: &str, dup: &mut HashSet<String>) -> T
-where
-    T: FromStr,
-    T::Err: Display,
-{
-    load_and_map(value, path, dup, |s| T::from_str(s))
+    fn load(self, path: &str, loader: &mut Loader) -> Self;
 }
 
 macro_rules! impl_load_env {
     ($($t:ident),*) => {$(
         impl LoadEnv for $t {
-            fn load(self, path: &str, dup: &mut HashSet<String>) -> Self {
-                load_as_str(self, path, dup)
+            fn load(self, path: &str, loader: &mut Loader) -> Self {
+                loader.load_from_str(self, path)
             }
         }
     )*}
@@ -189,8 +242,8 @@ macro_rules! impl_load_env_containers {
         impl<$($p),*> LoadEnv for $t<$($p),*>
         where $( $p : $tb1 $(+ $tb2)* ),*
         {
-            fn load(self, path: &str, dup: &mut HashSet<String>) -> Self {
-                load_as_yaml(self, path, dup)
+            fn load(self, path: &str, loader: &mut Loader) -> Self {
+                loader.load_from_yaml(self, path)
             }
         }
     )*}
@@ -209,24 +262,24 @@ impl_load_env_containers! {
 }
 
 macro_rules! peel {
-    ($name:ident, $($other:ident,)*) => (tuple! { $($other,)* })
+    ($name:ident, $($other:ident,)*) => (impl_load_env_tuples! { $($other,)* })
 }
 
-macro_rules! tuple {
+macro_rules! impl_load_env_tuples {
     () => ();
     ( $($name:ident,)+ ) => (
         impl<$($name),*> LoadEnv for ($($name,)*)
             where $($name: DeserializeOwned,)*
         {
-            fn load(self, path: &str, dup: &mut HashSet<String>) -> Self {
-                load_as_yaml(self, path, dup)
+            fn load(self, path: &str, loader: &mut Loader) -> Self {
+                loader.load_from_yaml(self, path)
             }
         }
         peel! { $($name,)* }
     )
 }
 
-tuple! { T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, }
+impl_load_env_tuples! { T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, }
 
 /// Load environment variables to a struct.
 ///
@@ -261,12 +314,12 @@ pub fn load<T>(data: T, prefix: &str) -> T
 where
     T: LoadEnv,
 {
-    let mut dup = HashSet::new();
-    data.load(prefix, &mut dup)
+    let mut loader = Loader::new();
+    data.load(prefix, &mut loader)
 }
 
 impl LoadEnv for std::time::Duration {
-    fn load(self, path: &str, dup: &mut HashSet<String>) -> Self {
-        load_and_map(self, path, dup, |s| parse_duration::parse(s))
+    fn load(self, path: &str, loader: &mut Loader) -> Self {
+        loader.load_and_map(self, path, |s| parse_duration::parse(s))
     }
 }
