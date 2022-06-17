@@ -151,7 +151,7 @@
 //! }
 //! ```
 //!
-use std::collections::{BinaryHeap, BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 use std::hash::Hash;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
 use std::num::{
@@ -210,8 +210,8 @@ mod loader;
 /// Return `self` to use the original value.
 ///
 pub trait LoadEnv
-    where
-        Self: Sized,
+where
+    Self: Sized,
 {
     fn load(self, path: &str, loader: &mut Loader) -> Self;
 }
@@ -311,8 +311,8 @@ impl_load_env_tuples! { T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, }
 /// ```
 ///
 pub fn load<T>(data: T, prefix: &str) -> T
-    where
-        T: LoadEnv,
+where
+    T: LoadEnv,
 {
     let mut loader = Loader::new();
     data.load(prefix, &mut loader)

@@ -7,14 +7,14 @@ use serde::de::DeserializeOwned;
 
 /// Responsible for loading/parsing environment variables.
 pub struct Loader {
-    paths: HashSet<String>,
+    names: HashSet<String>,
 }
 
 impl Loader {
     /// Create the instance.
     pub fn new() -> Self {
         Self {
-            paths: HashSet::new(),
+            names: HashSet::new(),
         }
     }
 
@@ -29,19 +29,19 @@ impl Loader {
     /// assert!(loader.is_duplicated("PREFIX_X"));
     /// ```
     ///
-    pub fn is_duplicated(&mut self, path: &str) -> bool {
-        !self.paths.insert(path.into())
+    pub fn is_duplicated(&mut self, name: &str) -> bool {
+        !self.names.insert(name.into())
     }
 
-    /// Loads an environment variable and overrides the original value if the value is successfully loaded.
+    /// Loads an environment variable and converts it to a specific type.
     ///
     /// The function does the following:
     ///
-    /// * Checks duplication (case insensitive)
-    /// * Loads a corresponding environment variable (look up `path` as upper-case)
+    /// * Checks the duplication of environment variable names loaded so far (case insensitive)
+    /// * Loads the environment variable (look up `name` as upper-case)
     /// * Calls `map` function to convert the loaded string to a specific type.
     ///
-    /// If loading/conversion is successful, the function returns the new value loaded. Otherwise, returns `fallback_value`.
+    /// If loading/conversion is successful, the function returns the new value loaded. Otherwise, returns `fallback`.
     ///
     /// ```
     /// # use econf::Loader;
@@ -55,31 +55,31 @@ impl Loader {
     /// assert_eq!(loader.load_and_map(1, "BUZZ", |v| v.parse()), 1);
     /// ```
     ///
-    pub fn load_and_map<T, F, E>(&mut self, fallback_value: T, path: &str, map: F) -> T
+    pub fn load_and_map<T, F, E>(&mut self, fallback: T, name: &str, map: F) -> T
         where
             F: FnOnce(&str) -> Result<T, E>,
             E: Display,
     {
-        let path = path.to_uppercase();
+        let name = name.to_uppercase();
 
-        if self.is_duplicated(&path) {
-            warn!("econf: warning: {} is ambiguous", path);
+        if self.is_duplicated(&name) {
+            warn!("econf: warning: {} is ambiguous", name);
         }
 
-        match std::env::var(&path) {
+        match std::env::var(&name) {
             Ok(s) => match map(&s) {
                 Ok(v) => {
-                    info!("econf: loading {}: found {}", path, s);
+                    info!("econf: loading {}: found {}", name, s);
                     v
                 }
                 Err(e) => {
-                    error!("econf: loading {}: error on parsing \"{}\": {}", path, s, e);
-                    fallback_value
+                    error!("econf: loading {}: error on parsing \"{}\": {}", name, s, e);
+                    fallback
                 }
             },
             Err(_) => {
-                info!("econf: loading {}: not found", path);
-                fallback_value
+                info!("econf: loading {}: not found", name);
+                fallback
             }
         }
     }
@@ -89,7 +89,7 @@ impl Loader {
     /// The function is used to load compound types and collections. Since the yaml is the superset of json,
     /// the function is usable to parse json format.
     ///
-    /// If loading/conversion is successful, the function returns the new value loaded. Otherwise, returns `fallback_value`.
+    /// If loading/conversion is successful, the function returns the new value loaded. Otherwise, returns `fallback`.
     ///
     /// ```
     /// # use econf::Loader;
@@ -107,16 +107,16 @@ impl Loader {
     /// assert_eq!(loader.load_from_yaml(vec![1usize, 2, 3], "BUZZ"), vec![1, 2, 3]);
     /// ```
     ///
-    pub fn load_from_yaml<T>(&mut self, fallback_value: T, path: &str) -> T
+    pub fn load_from_yaml<T>(&mut self, fallback: T, name: &str) -> T
         where
             T: DeserializeOwned,
     {
-        self.load_and_map(fallback_value, path, |s| serde_yaml::from_str(s))
+        self.load_and_map(fallback, name, |s| serde_yaml::from_str(s))
     }
 
     /// Loads an environment variable then converts it to a specific type using [`from_str`](std::str::FromStr::from_str).
     ///
-    /// If loading/conversion is successful, the function returns the new value loaded. Otherwise, returns `fallback_value`.
+    /// If loading/conversion is successful, the function returns the new value loaded. Otherwise, returns `fallback`.
     ///
     /// ```
     /// # use econf::Loader;
@@ -134,11 +134,11 @@ impl Loader {
     /// assert_eq!(loader.load_from_str(1, "BUZZ"), 1);
     /// ```
     ///
-    pub fn load_from_str<T>(&mut self, fallback_value: T, path: &str) -> T
+    pub fn load_from_str<T>(&mut self, fallback: T, name: &str) -> T
         where
             T: FromStr,
             T::Err: Display,
     {
-        self.load_and_map(fallback_value, path, |s| T::from_str(s))
+        self.load_and_map(fallback, name, |s| T::from_str(s))
     }
 }
