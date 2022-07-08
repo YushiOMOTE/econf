@@ -357,6 +357,40 @@ fn skipped() {
 }
 
 #[derive(LoadEnv)]
+struct NestedRenamed {
+    s: String,
+}
+
+#[derive(LoadEnv)]
+struct Renamed {
+    v1: bool,
+    #[econf(rename = "example_1")]
+    v2: u32,
+    #[econf(rename = "example_2")]
+    v3: NestedRenamed,
+}
+
+#[test]
+fn renamed() {
+    std::env::set_var("RENAMED_V1", "true");
+    std::env::set_var("RENAMED_EXAMPLE_1", "42");
+    std::env::set_var("RENAMED_EXAMPLE_2_S", "renamed text");
+
+    let a = Renamed {
+        v1: false,
+        v2: 0,
+        v3: NestedRenamed {
+            s: "initial".to_string(),
+        },
+    };
+
+    let a = econf::load(a, "renamed");
+    assert_eq!(a.v1, true);
+    assert_eq!(a.v2, 42);
+    assert_eq!(a.v3.s, "renamed text".to_string());
+}
+
+#[derive(LoadEnv)]
 struct Net {
     n1: IpAddr,
     n2: Ipv4Addr,
