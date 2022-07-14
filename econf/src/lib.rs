@@ -151,6 +151,19 @@
 //! }
 //! ```
 //!
+//! # Renaming fields
+//!
+//! Load a field with the given name instead of its Rust's field name. This is helpful if the environment variable name and Rust's field name don't match:
+//!
+//! ```
+//! #[derive(LoadEnv)]
+//! struct A {
+//!     x: bool,
+//!     #[econf(rename = "ANOTHER_Y")]
+//!     y: u64, // will be loaded from an environment variable `ANOTHER_Y`
+//! }
+//! ```
+//!
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 use std::hash::Hash;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
