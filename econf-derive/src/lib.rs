@@ -4,7 +4,7 @@ use proc_macro::TokenStream;
 
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{Data, DeriveInput, Field, Fields, Meta, NestedMeta, parse_macro_input};
+use syn::{parse_macro_input, Data, DeriveInput, Field, Fields, Lit, Meta, NestedMeta};
 
 #[proc_macro_derive(LoadEnv, attributes(econf))]
 pub fn load_env(input: TokenStream) -> TokenStream {
@@ -34,6 +34,27 @@ fn is_skip(f: &Field) -> bool {
     })
 }
 
+fn find_renaming(f: &Field) -> Option<String> {
+    f.attrs
+        .iter()
+        .filter(|attr| attr.path.is_ident("econf"))
+        .filter_map(|attr| match attr.parse_meta().unwrap() {
+            Meta::List(meta) => Some(meta.nested),
+            _ => None,
+        })
+        .flat_map(|nested| nested.into_iter())
+        .filter_map(|nested| match nested {
+            NestedMeta::Meta(Meta::NameValue(value)) if value.ident.to_string() == "rename" => {
+                Some(value)
+            }
+            _ => None,
+        })
+        .find_map(|value| match value.lit {
+            Lit::Str(token) => Some(token.value()),
+            _ => None,
+        })
+}
+
 fn content(name: &Ident, data: &Data) -> TokenStream2 {
     match data {
         Data::Struct(data) => match &data.fields {
@@ -45,8 +66,13 @@ fn content(name: &Ident, data: &Data) -> TokenStream2 {
                             #ident: self.#ident,
                         };
                     }
-                    quote! {
-                        #ident: self.#ident.load(&(path.to_owned() + "_" + stringify!(#ident)), loader),
+                    match find_renaming(f) {
+                        Some(overwritten_name) => quote! {
+                            #ident: self.#ident.load(&(path.to_owned() + "_" + #overwritten_name), loader),
+                        },
+                        None => quote! {
+                            #ident: self.#ident.load(&(path.to_owned() + "_" + stringify!(#ident)), loader),
+                        }
                     }
                 });
                 quote! {
@@ -62,8 +88,13 @@ fn content(name: &Ident, data: &Data) -> TokenStream2 {
                     if is_skip(f) {
                         return quote! { self.#i, };
                     }
-                    quote! {
-                        self.#i.load(&(path.to_owned() + "_" + &#i.to_string()), loader),
+                    match find_renaming(f) {
+                        Some(overwritten_name) => quote! {
+                            self.#i.load(&(path.to_owned() + "_" + #overwritten_name), loader),
+                        },
+                        None => quote! {
+                            self.#i.load(&(path.to_owned() + "_" + &#i.to_string()), loader),
+                        },
                     }
                 });
                 quote! {

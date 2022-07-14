@@ -150,5 +150,17 @@ struct A {
 }
 ```
 
+## Renaming fields
+
+Load a field with the given name instead of its Rust's field name. This is helpful if the environment variable name and Rust's field name don't match:
+
+```
+#[derive(LoadEnv)]
+struct A {
+    x: bool,
+    #[econf(rename = "ANOTHER_Y")]
+    y: u64, // will be loaded from an environment variable `ANOTHER_Y`
+}
+```
 
 License: MIT
