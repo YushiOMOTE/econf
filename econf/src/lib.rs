@@ -156,6 +156,7 @@
 //! Load a field with the given name instead of its Rust's field name. This is helpful if the environment variable name and Rust's field name don't match:
 //!
 //! ```
+//! # use econf::LoadEnv;
 //! #[derive(LoadEnv)]
 //! struct A {
 //!     x: bool,
