@@ -154,7 +154,7 @@ struct A {
 
 Load a field with the given name instead of its Rust's field name. This is helpful if the environment variable name and Rust's field name don't match:
 
-```
+```rust
 #[derive(LoadEnv)]
 struct A {
     x: bool,
@@ -162,5 +162,6 @@ struct A {
     y: u64, // will be loaded from an environment variable `ANOTHER_Y`
 }
 ```
+
 
 License: MIT
