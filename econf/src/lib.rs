@@ -334,6 +334,6 @@ where
 
 impl LoadEnv for std::time::Duration {
     fn load(self, path: &str, loader: &mut Loader) -> Self {
-        loader.load_and_map(self, path, |s| parse_duration::parse(s))
+        loader.load_and_map(self, path, |s| humantime::parse_duration(s))
     }
 }
