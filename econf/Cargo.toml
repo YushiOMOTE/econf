@@ -18,4 +18,4 @@ econf-derive = { version = "0.2.1", path = "../econf-derive" }
 humantime = "2.1"
 
 [dev-dependencies]
-simple_logger = "0.5"
+simple_logger = "5.0"
