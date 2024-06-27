@@ -32,7 +32,7 @@ version = "0.2.1"
 dependencies = [
  "proc-macro2 0.4.30",
  "quote 0.6.13",
- "syn 0.15.44",
+ "syn",
 ]
 
 [[package]]
@@ -137,7 +137,7 @@ checksum = "500cbc0ebeb6f46627f50f3f5811ccf6bf00643be300b4c3eabc0ef55dc5b5ba"
 dependencies = [
  "proc-macro2 1.0.86",
  "quote 1.0.36",
- "syn 2.0.68",
+ "syn",
 ]
 
 [[package]]
@@ -160,17 +160,6 @@ checksum = "2c0619150c42143a91bd79aa00b5f01f9b0a3ec38b1a59bc0b2f5aa24fc4c9bd"
 dependencies = [
  "log",
  "time",
-]
-
-[[package]]
-name = "syn"
-version = "0.15.44"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ca4b3b69a77cbe1ffc9e198781b7acb0c7365a883670e8f1c1bc66fba79a5c5"
-dependencies = [
- "proc-macro2 0.4.30",
- "quote 0.6.13",
- "unicode-xid",
 ]
 
 [[package]]
