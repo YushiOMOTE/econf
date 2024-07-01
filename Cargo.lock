@@ -49,7 +49,7 @@ dependencies = [
 name = "econf-derive"
 version = "0.2.1"
 dependencies = [
- "proc-macro2 0.4.30",
+ "proc-macro2 1.0.86",
  "quote 0.6.13",
  "syn 0.15.44",
 ]
