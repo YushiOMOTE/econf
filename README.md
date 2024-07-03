@@ -20,16 +20,14 @@ struct A {
     y: u64,
 }
 
-fn main() {
-    let a = A {
-        x: true,
-        y: 42,
-    };
-    println!("Before: {:?}", a);
+let a = A {
+    x: true,
+    y: 42,
+};
+println!("Before: {:?}", a);
 
-    let a = econf::load(a, "PREFIX");
-    println!("After:  {:?}", a);
-}
+let a = econf::load(a, "PREFIX");
+println!("After:  {:?}", a);
 ```
 
 ```sh
@@ -87,17 +85,15 @@ struct B {
     v2: usize,
 }
 
-fn main() {
-    let a = A {
-        v1: 1,
-        v2: B {
-            v1: 2,
-            v2: 3,
-        },
-    };
+let a = A {
+    v1: 1,
+    v2: B {
+        v1: 2,
+        v2: 3,
+    },
+};
 
-    let a = econf::load(a, "PREFIX");
-}
+let a = econf::load(a, "PREFIX");
 ```
 
 In this example,
@@ -122,17 +118,15 @@ struct B {
     v2: usize,
 }
 
-fn main() {
-    let a = A {
-        v2_v1: 1,
-        v2: B {
-            v1: 2,
-            v2: 3,
-        },
-    };
+let a = A {
+    v2_v1: 1,
+    v2: B {
+        v1: 2,
+        v2: 3,
+    },
+};
 
-    let a = econf::load(a, "PREFIX");
-}
+let a = econf::load(a, "PREFIX");
 ```
 
 Here `PREFIX_V2_V1` corresponds to both `a.v2_v1` and `a.v2.v1`. In this case, `econf` prints warning through [`log facade`](https://docs.rs/log/latest/log/) and the value is loaded to both `a.v2_v1` and `a.v2.v1`.
