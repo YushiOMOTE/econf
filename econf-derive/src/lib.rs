@@ -4,7 +4,7 @@ use proc_macro::TokenStream;
 
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Field, Fields, Lit, Meta, NestedMeta};
+use syn::{parse_macro_input, Data, DeriveInput, Field, Fields, LitStr};
 
 #[proc_macro_derive(LoadEnv, attributes(econf))]
 pub fn load_env(input: TokenStream) -> TokenStream {
@@ -26,31 +26,34 @@ pub fn load_env(input: TokenStream) -> TokenStream {
 }
 
 fn is_skip(f: &Field) -> bool {
-    f.attrs.iter().any(|a| {
-        a.path.is_ident("econf")
-            && matches!(a.parse_meta().unwrap(), Meta::List(meta) if meta.nested.iter().any(|nm| {
-                matches!(nm, NestedMeta::Meta(Meta::Word(word)) if *word == "skip")
-            }))
+    f.attrs.iter().any(|attr| {
+        if attr.path().is_ident("econf") {
+            if let Ok(args) = attr.parse_args::<Ident>() {
+                return args == "skip";
+            }
+        }
+
+        false
     })
 }
 
 fn find_renaming(f: &Field) -> Option<String> {
-    f.attrs
-        .iter()
-        .filter(|attr| attr.path.is_ident("econf"))
-        .filter_map(|attr| match attr.parse_meta().unwrap() {
-            Meta::List(meta) => Some(meta.nested),
-            _ => None,
-        })
-        .flat_map(|nested| nested.into_iter())
-        .filter_map(|nested| match nested {
-            NestedMeta::Meta(Meta::NameValue(value)) if value.ident == "rename" => Some(value),
-            _ => None,
-        })
-        .find_map(|value| match value.lit {
-            Lit::Str(token) => Some(token.value()),
-            _ => None,
-        })
+    let mut rename = None;
+    for attr in &f.attrs {
+        if attr.path().is_ident("econf") {
+            attr.parse_nested_meta(|meta| {
+                if meta.path.is_ident("rename") {
+                    let s: LitStr = meta.value()?.parse()?;
+                    rename = Some(s.value());
+                }
+
+                Ok(())
+            })
+            .expect("failed to parse nested meta");
+        }
+    }
+
+    rename
 }
 
 fn content(name: &Ident, data: &Data) -> TokenStream2 {

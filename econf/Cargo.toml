@@ -14,7 +14,7 @@ readme = "README.md"
 log = "0.4"
 serde = "1.0"
 serde_yaml = "0.8"
-econf-derive = { version = "0.2.1", path = "../econf-derive" }
+econf-derive = { path = "../econf-derive" }
 humantime = "2.1"
 
 [dev-dependencies]
