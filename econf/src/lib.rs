@@ -18,16 +18,14 @@
 //!     y: u64,
 //! }
 //!
-//! fn main() {
-//!     let a = A {
-//!         x: true,
-//!         y: 42,
-//!     };
-//!     println!("Before: {:?}", a);
+//! let a = A {
+//!     x: true,
+//!     y: 42,
+//! };
+//! println!("Before: {:?}", a);
 //!
-//!     let a = econf::load(a, "PREFIX");
-//!     println!("After:  {:?}", a);
-//! }
+//! let a = econf::load(a, "PREFIX");
+//! println!("After:  {:?}", a);
 //! ```
 //!
 //! ```sh
@@ -86,17 +84,15 @@
 //!     v2: usize,
 //! }
 //!
-//! fn main() {
-//!     let a = A {
-//!         v1: 1,
-//!         v2: B {
-//!             v1: 2,
-//!             v2: 3,
-//!         },
-//!     };
+//! let a = A {
+//!     v1: 1,
+//!     v2: B {
+//!         v1: 2,
+//!         v2: 3,
+//!     },
+//! };
 //!
-//!     let a = econf::load(a, "PREFIX");
-//! }
+//! let a = econf::load(a, "PREFIX");
 //! ```
 //!
 //! In this example,
@@ -122,17 +118,15 @@
 //!     v2: usize,
 //! }
 //!
-//! fn main() {
-//!     let a = A {
-//!         v2_v1: 1,
-//!         v2: B {
-//!             v1: 2,
-//!             v2: 3,
-//!         },
-//!     };
+//! let a = A {
+//!     v2_v1: 1,
+//!     v2: B {
+//!         v1: 2,
+//!         v2: 3,
+//!     },
+//! };
 //!
-//!     let a = econf::load(a, "PREFIX");
-//! }
+//! let a = econf::load(a, "PREFIX");
 //! ```
 //!
 //! Here `PREFIX_V2_V1` corresponds to both `a.v2_v1` and `a.v2.v1`. In this case, `econf` prints warning through [`log facade`](https://docs.rs/log/latest/log/) and the value is loaded to both `a.v2_v1` and `a.v2.v1`.
@@ -313,15 +307,13 @@ impl_load_env_tuples! { T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, }
 ///     y: u64,
 /// }
 ///
-/// fn main() {
-///     let a = A {
-///         x: true,
-///         y: 42,
-///     };
+/// let a = A {
+///     x: true,
+///     y: 42,
+/// };
 ///
-///     let a = econf::load(a, "FOO");
-///     // Here we get `A` with some members overridden by environment variables.
-/// }
+/// let a = econf::load(a, "FOO");
+/// // Here we get `A` with some members overridden by environment variables.
 /// ```
 ///
 pub fn load<T>(data: T, prefix: &str) -> T
@@ -334,6 +326,6 @@ where
 
 impl LoadEnv for std::time::Duration {
     fn load(self, path: &str, loader: &mut Loader) -> Self {
-        loader.load_and_map(self, path, |s| humantime::parse_duration(s))
+        loader.load_and_map(self, path, humantime::parse_duration)
     }
 }

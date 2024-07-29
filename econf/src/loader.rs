@@ -10,6 +10,12 @@ pub struct Loader {
     names: HashSet<String>,
 }
 
+impl Default for Loader {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Loader {
     /// Create the instance.
     pub fn new() -> Self {
@@ -56,9 +62,9 @@ impl Loader {
     /// ```
     ///
     pub fn load_and_map<T, F, E>(&mut self, fallback: T, name: &str, map: F) -> T
-        where
-            F: FnOnce(&str) -> Result<T, E>,
-            E: Display,
+    where
+        F: FnOnce(&str) -> Result<T, E>,
+        E: Display,
     {
         let name = name.to_uppercase();
 
@@ -108,8 +114,8 @@ impl Loader {
     /// ```
     ///
     pub fn load_from_yaml<T>(&mut self, fallback: T, name: &str) -> T
-        where
-            T: DeserializeOwned,
+    where
+        T: DeserializeOwned,
     {
         self.load_and_map(fallback, name, |s| serde_yaml::from_str(s))
     }
@@ -135,9 +141,9 @@ impl Loader {
     /// ```
     ///
     pub fn load_from_str<T>(&mut self, fallback: T, name: &str) -> T
-        where
-            T: FromStr,
-            T::Err: Display,
+    where
+        T: FromStr,
+        T::Err: Display,
     {
         self.load_and_map(fallback, name, |s| T::from_str(s))
     }

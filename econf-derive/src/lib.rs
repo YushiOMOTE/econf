@@ -29,7 +29,7 @@ fn is_skip(f: &Field) -> bool {
     f.attrs.iter().any(|a| {
         a.path.is_ident("econf")
             && matches!(a.parse_meta().unwrap(), Meta::List(meta) if meta.nested.iter().any(|nm| {
-                matches!(nm, NestedMeta::Meta(Meta::Word(word)) if word.to_string() == "skip")
+                matches!(nm, NestedMeta::Meta(Meta::Word(word)) if *word == "skip")
             }))
     })
 }
@@ -44,9 +44,7 @@ fn find_renaming(f: &Field) -> Option<String> {
         })
         .flat_map(|nested| nested.into_iter())
         .filter_map(|nested| match nested {
-            NestedMeta::Meta(Meta::NameValue(value)) if value.ident.to_string() == "rename" => {
-                Some(value)
-            }
+            NestedMeta::Meta(Meta::NameValue(value)) if value.ident == "rename" => Some(value),
             _ => None,
         })
         .find_map(|value| match value.lit {
