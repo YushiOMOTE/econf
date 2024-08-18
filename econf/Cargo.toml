@@ -13,7 +13,7 @@ readme = "README.md"
 [dependencies]
 log = "0.4"
 serde = "1.0"
-serde_yaml = "0.8"
+serde_yaml = "0.9"
 econf-derive = { path = "../econf-derive" }
 humantime = "2.1"
 
