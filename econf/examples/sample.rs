@@ -2,7 +2,7 @@ use econf::LoadEnv;
 use log::*;
 use std::collections::HashMap;
 
-#[derive(Debug, LoadEnv)]
+#[derive(Debug, strum::EnumString, LoadEnv)]
 enum X {
     V1,
     V2,

@@ -113,21 +113,8 @@ fn content(name: &Ident, data: &Data) -> TokenStream2 {
                 Fields::Unit => {}
             });
 
-            let enums0 = data.variants.iter().map(|_| &name);
-            let enums1 = data.variants.iter().map(|f| &f.ident);
-            let enums2 = data.variants.iter().map(|f| &f.ident);
-
             quote! {
-                match String::default().load(path, loader).as_ref() {
-                    #(
-                        stringify!(#enums1) => #enums0::#enums2,
-                    )*
-                    "" => self,
-                    x => {
-                        error!("econf: couldn't find variant: {}", x);
-                        self
-                    }
-                }
+                loader.load_from_str(self, path)
             }
         }
         Data::Union(_) => unimplemented!("Unions are not supported"),
