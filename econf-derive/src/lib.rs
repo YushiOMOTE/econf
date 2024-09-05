@@ -4,7 +4,7 @@ use proc_macro::TokenStream;
 
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Field, Fields, LitStr};
+use syn::{parse_macro_input, Attribute, Data, DeriveInput, Field, Fields, LitStr, Variant};
 
 #[proc_macro_derive(LoadEnv, attributes(econf))]
 pub fn load_env(input: TokenStream) -> TokenStream {
@@ -37,9 +37,9 @@ fn is_skip(f: &Field) -> bool {
     })
 }
 
-fn find_renaming(f: &Field) -> Option<String> {
+fn find_renaming(attrs: &[Attribute]) -> Option<String> {
     let mut rename = None;
-    for attr in &f.attrs {
+    for attr in attrs {
         if attr.path().is_ident("econf") {
             attr.parse_nested_meta(|meta| {
                 if meta.path.is_ident("rename") {
@@ -56,6 +56,14 @@ fn find_renaming(f: &Field) -> Option<String> {
     rename
 }
 
+fn find_field_renaming(f: &Field) -> Option<String> {
+    find_renaming(&f.attrs)
+}
+
+fn find_variant_renaming(v: &Variant) -> Option<String> {
+    find_renaming(&v.attrs)
+}
+
 fn content(name: &Ident, data: &Data) -> TokenStream2 {
     match data {
         Data::Struct(data) => match &data.fields {
@@ -67,7 +75,7 @@ fn content(name: &Ident, data: &Data) -> TokenStream2 {
                             #ident: self.#ident,
                         };
                     }
-                    match find_renaming(f) {
+                    match find_field_renaming(f) {
                         Some(overwritten_name) => quote! {
                             #ident: self.#ident.load(&(path.to_owned() + "_" + #overwritten_name), loader),
                         },
@@ -89,7 +97,7 @@ fn content(name: &Ident, data: &Data) -> TokenStream2 {
                     if is_skip(f) {
                         return quote! { self.#i, };
                     }
-                    match find_renaming(f) {
+                    match find_field_renaming(f) {
                         Some(overwritten_name) => quote! {
                             self.#i.load(&(path.to_owned() + "_" + #overwritten_name), loader),
                         },
@@ -114,7 +122,11 @@ fn content(name: &Ident, data: &Data) -> TokenStream2 {
             });
 
             let enums0 = data.variants.iter().map(|_| &name);
-            let enums1 = data.variants.iter().map(|f| &f.ident);
+            let enums1 = data.variants.iter().map(|f| {
+                find_variant_renaming(f)
+                    .map(|overwritten_name| Ident::new(&overwritten_name, f.ident.span()))
+                    .unwrap_or_else(|| f.ident.clone())
+            });
             let enums2 = data.variants.iter().map(|f| &f.ident);
 
             quote! {

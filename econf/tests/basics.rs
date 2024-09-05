@@ -1,4 +1,5 @@
 use econf::LoadEnv;
+use log::*;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
 use std::path::PathBuf;
@@ -361,6 +362,13 @@ struct NestedRenamed {
     s: String,
 }
 
+#[derive(Debug, Eq, PartialEq, LoadEnv)]
+enum EnumRenamed {
+    V1,
+    #[econf(rename = "example_3")]
+    V2,
+}
+
 #[derive(LoadEnv)]
 struct Renamed {
     v1: bool,
@@ -368,6 +376,7 @@ struct Renamed {
     v2: u32,
     #[econf(rename = "example_2")]
     v3: NestedRenamed,
+    v4: EnumRenamed,
 }
 
 #[test]
@@ -375,6 +384,7 @@ fn renamed() {
     std::env::set_var("RENAMED_V1", "true");
     std::env::set_var("RENAMED_EXAMPLE_1", "42");
     std::env::set_var("RENAMED_EXAMPLE_2_S", "renamed text");
+    std::env::set_var("RENAMED_V4", "example_3");
 
     let a = Renamed {
         v1: false,
@@ -382,12 +392,14 @@ fn renamed() {
         v3: NestedRenamed {
             s: "initial".to_string(),
         },
+        v4: EnumRenamed::V1,
     };
 
     let a = econf::load(a, "renamed");
     assert_eq!(a.v1, true);
     assert_eq!(a.v2, 42);
     assert_eq!(a.v3.s, "renamed text".to_string());
+    assert_eq!(a.v4, EnumRenamed::V2);
 }
 
 #[derive(LoadEnv)]
