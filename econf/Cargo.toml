@@ -19,3 +19,4 @@ humantime = "2.1"
 
 [dev-dependencies]
 simple_logger = "5.0"
+strum = { version = "0.26", features = ["derive"] }

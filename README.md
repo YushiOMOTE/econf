@@ -68,6 +68,26 @@ There are some existing crates that provide similar features but `econf` is uniq
 * Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`, `tuple`
     * Containers are parsed as YAML format. See [the tests](https://github.com/YushiOMOTE/econf/blob/master/econf/tests/basics.rs).
 
+## Enums
+
+Since v0.3.0, econf requires enums to implement [FromStr](https://doc.rust-lang.org/std/str/trait.FromStr.html) trait. Without this implementation, your program will fail to compile. While you can write the `FromStr` implementation manually, you can alternatively use [strum](https://github.com/Peternator7/strum) crate to automatically generate it. `strum` provides several useful features, making it a generally recommended choice. See [econf/examples/strum.rs](https://github.com/YushiOMOTE/econf/tree/master/econf/examples/strum.rs) for example code.
+
+```rust
+use econf::LoadEnv;
+
+#[derive(Debug, strum::EnumString, LoadEnv)]
+#[strum(serialize_all = "kebab-case")]
+enum AuthMode {
+    ApiKey,
+    BasicAuth,
+    #[strum(ascii_case_insensitive)]
+    BearerToken,
+    #[strum(serialize = "oauth", serialize = "OAuth")]
+    OAuth,
+    JWT,
+}
+```
+
 ## Nesting
 
 Nested structs are supported.
