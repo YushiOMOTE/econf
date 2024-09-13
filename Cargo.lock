@@ -23,7 +23,7 @@ dependencies = [
 
 [[package]]
 name = "econf"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "econf-derive",
  "humantime",
@@ -36,7 +36,7 @@ dependencies = [
 
 [[package]]
 name = "econf-derive"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "proc-macro2",
  "quote",
