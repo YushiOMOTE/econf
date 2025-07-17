@@ -188,6 +188,9 @@ use std::num::{
 };
 use std::path::PathBuf;
 
+#[cfg(feature = "url")]
+use url::Url;
+
 use serde::de::DeserializeOwned;
 
 pub use econf_derive::LoadEnv;
@@ -264,6 +267,9 @@ impl_load_env! {
     NonZeroI128, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI8, NonZeroIsize, NonZeroU128,
     NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize, PathBuf
 }
+
+#[cfg(feature = "url")]
+impl_load_env! { Url }
 
 macro_rules! impl_load_env_containers {
     ($( $t:ident<$( $p:ident : $tb1:ident $(+ $tb2:ident)* ),*> ),*) => {$(

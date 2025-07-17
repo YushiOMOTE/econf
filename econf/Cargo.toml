@@ -16,7 +16,11 @@ serde = "1.0"
 serde_yaml = "0.9"
 econf-derive = { version = "0.3.0", path = "../econf-derive" }
 humantime = "2.1"
+url = { version = "2.5", optional = true }
 
 [dev-dependencies]
 simple_logger = "5.0"
 strum = { version = "0.26", features = ["derive"] }
+
+[features]
+url = ["dep:url"]

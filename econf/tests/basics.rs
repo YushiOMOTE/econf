@@ -581,6 +581,34 @@ fn path_buf() {
     assert_eq!(a.p3, "data.db".parse::<PathBuf>().unwrap());
 }
 
+#[cfg(feature = "url")]
+mod url {
+    use super::*;
+    use ::url::Url;
+
+    #[derive(LoadEnv)]
+    struct Urls {
+        u1: Url,
+    }
+
+    #[test]
+    fn url() {
+        std::env::set_var("URLS_U1", "https://github.com/YushiOMOTE/econf/");
+
+        let a = Urls {
+            u1: Url::parse("https://example.net").unwrap(),
+        };
+
+        let a = econf::load(a, "urls");
+        assert_eq!(
+            a.u1,
+            "https://github.com/YushiOMOTE/econf/"
+                .parse::<Url>()
+                .unwrap()
+        );
+    }
+}
+
 #[test]
 fn generics() {
     std::env::set_var("GENERICS_A", "33");
