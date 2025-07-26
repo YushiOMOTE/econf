@@ -1,6 +1,6 @@
 [package]
 name = "econf"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Yushi OMOTE <yushiomote@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -14,7 +14,7 @@ readme = "README.md"
 log = "0.4"
 serde = "1.0"
 serde_yaml = "0.9"
-econf-derive = { version = "0.3.0", path = "../econf-derive" }
+econf-derive = { version = "0.3.1", path = "../econf-derive" }
 humantime = "2.1"
 url = { version = "2.5", optional = true }
 
