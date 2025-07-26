@@ -13,6 +13,8 @@ jobs:
         run: cargo build --verbose --examples
       - name: Test (stable)
         run: cargo test --verbose
+      - name: Test with all features (stable)
+        run: cargo test --verbose --all-features
       - name: Install nightly
         uses: actions-rs/toolchain@v1
         with:
@@ -24,3 +26,5 @@ jobs:
         run: cargo build --verbose --examples
       - name: Test (nightly)
         run: cargo test --verbose
+      - name: Test with all features (nightly)
+        run: cargo test --verbose --all-features
