@@ -65,8 +65,45 @@ There are some existing crates that provide similar features but `econf` is uniq
 * Network: `IpAddr`,`Ipv4Addr`,`Ipv6Addr`,`SocketAddr`,`SocketAddrV4`,`SocketAddrV6`
 * Non-zero types: `NonZeroI128`,`NonZeroI16`,`NonZeroI32`,`NonZeroI64`,`NonZeroI8`,`NonZeroIsize`,`NonZeroU128`, `NonZeroU16`,`NonZeroU32`,`NonZeroU64`,`NonZeroU8`, `NonZeroUsize`
 * File system: `PathBuf`
+* URL: `Url` (requires `url` feature)
 * Containers: `Vec`, `HashSet`, `HashMap`, `Option`, `BTreeMap`, `BTreeSet`, `BinaryHeap`, `LinkedList`, `VecDeque`, `tuple`
     * Containers are parsed as YAML format. See [the tests](https://github.com/YushiOMOTE/econf/blob/master/econf/tests/basics.rs).
+
+## Features
+
+`econf` supports optional features that can be enabled to add support for additional types:
+
+### URL Feature
+
+To enable URL support, add the `url` feature to your `Cargo.toml`:
+
+```toml
+[dependencies]
+econf = { version = "0.3", features = ["url"] }
+```
+
+With this feature enabled, you can load URLs from environment variables:
+
+```rust
+use econf::LoadEnv;
+use url::Url;
+
+#[derive(Debug, LoadEnv)]
+struct Config {
+    api_url: Url,
+}
+
+let config = Config {
+    api_url: Url::parse("https://api.example.com").unwrap(),
+};
+
+let config = econf::load(config, "APP");
+```
+
+```sh
+$ APP_API_URL=https://api.production.com ./app
+# api_url will be loaded from the environment variable
+```
 
 ## Enums
 
