@@ -77,7 +77,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! econf = { version = "0.3", features = ["url"] }
+//! econf = { version = "0.3.1", features = ["url"] }
 //! ```
 //!
 //! With this feature enabled, you can load URLs from environment variables:
